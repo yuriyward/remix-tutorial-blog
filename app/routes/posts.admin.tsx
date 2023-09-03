@@ -1,4 +1,5 @@
-import { LoaderArgs, json } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { getPosts } from "~/models/post.server";
 import { requireAdminUser } from "~/session.server";

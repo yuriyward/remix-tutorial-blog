@@ -8,6 +8,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
+  useRouteError,
 } from "@remix-run/react";
 
 import { getUser } from "~/session.server";
@@ -39,4 +41,25 @@ export default function App() {
       </body>
     </html>
   );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (error instanceof Error) {
+    return <div>An unexpected error occurred on app level: {error.message}</div>;
+  }
+
+  if (!isRouteErrorResponse(error)) {
+    return <h1>Unknown Error on app level</h1>;
+  }
+
+  if (error.status === 404) {
+    return (<div>
+      <h1>Uh oh, something went wrong. on app level</h1>
+      <p>Check the console for more information.</p>
+    </div>);
+  }
+
+  return <div>An unexpected error occurred on app level: {error.statusText}</div>;
 }

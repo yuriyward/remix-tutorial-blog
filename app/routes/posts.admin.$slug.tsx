@@ -2,9 +2,11 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
   Form,
+  isRouteErrorResponse,
   useActionData,
   useLoaderData,
   useNavigation,
+  useRouteError
 } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import {
@@ -20,17 +22,20 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 
   invariant(params.slug, "params.slug is required");
   const post = await getPost(params.slug);
-  invariant(post, `Post not found: ${params.slug}`);
+  // invariant(post, `Post not found: ${params.slug}`);
+  if (!post) {
+    throw new Response("Not found", { status: 404 });
+  }
 
   return json({ post });
 };
 
 type ActionData =
   | {
-      title: null | string;
-      slug: null | string;
-      markdown: null | string;
-    }
+    title: null | string;
+    slug: null | string;
+    markdown: null | string;
+  }
   | undefined;
 
 export const action = async ({ request, params }: ActionArgs) => {
@@ -130,7 +135,7 @@ export default function PostAdminSlug() {
             name="markdown"
             className={`${inputClassName} font-mono`}
             defaultValue={post.markdown}
-            // onChange={handleChange}
+          // onChange={handleChange}
           />
           <span>{JSON.stringify(post, null, 2)}</span>
         </p>
@@ -160,4 +165,26 @@ export default function PostAdminSlug() {
       </Form>
     </>
   );
+}
+
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (error instanceof Error) {
+    return <div>An unexpected error occurred: {error.message}</div>;
+  }
+
+  if (!isRouteErrorResponse(error)) {
+    return <h1>Unknown Error</h1>;
+  }
+
+  if (error.status === 404) {
+    return (<div>
+      <h1>Uh oh, something went wrong. This post doesn't exist</h1>
+      <p>Check the console for more information.</p>
+    </div>);
+  }
+
+  return <div>An unexpected error occurred: {error.statusText}</div>;
 }
