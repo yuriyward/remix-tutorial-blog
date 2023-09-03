@@ -13,15 +13,15 @@ import {
   getPost,
   updatePost,
 } from "~/models/post.server";
+import { requireAdminUser } from "~/session.server";
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ params, request }: LoaderArgs) => {
+  await requireAdminUser(request);
+
   invariant(params.slug, "params.slug is required");
   const post = await getPost(params.slug);
   invariant(post, `Post not found: ${params.slug}`);
 
-  //   const html = marked(post.markdown);
-
-  //   return json({ html, post });
   return json({ post });
 };
 
@@ -34,6 +34,8 @@ type ActionData =
   | undefined;
 
 export const action = async ({ request, params }: ActionArgs) => {
+  await requireAdminUser(request);
+
   const formData = await request.formData();
   const intent = formData.get("intent");
   invariant(params.slug, "slug is required");
@@ -82,29 +84,6 @@ export default function PostAdminSlug() {
   const isUpdating = navigation.formData?.get("intent") === "update";
   const isDeleting = navigation.formData?.get("intent") === "delete";
   const isNewPost = !post;
-
-  // const [values, setValues] = useState({
-  //   // title: "",
-  //   // slug: "",
-  //   markdown: "",
-  // });
-
-  // useEffect(() => {
-  //   setValues({
-  //     // title: post.title,
-  //     // slug: post.slug,
-  //     markdown: post.markdown,
-  //   });
-  // }, [post]);
-
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  // ) => {
-  //   setValues({
-  //     ...values,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
 
   return (
     <>

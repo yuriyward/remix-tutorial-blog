@@ -15,6 +15,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   password Password?
+  isAdmin  Boolean  @default(false)
   notes    Note[]
 }
 

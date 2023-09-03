@@ -3,10 +3,13 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { createPost } from "~/models/post.server";
+import { requireAdminUser } from "~/session.server";
 
 export const action = async ({ request }: ActionArgs) => {
+  await requireAdminUser(request);
+
   // TODO: remove me
-  await new Promise((res) => setTimeout(res, 1000));
+  // await new Promise((res) => setTimeout(res, 1000));
 
   const formData = await request.formData();
 
